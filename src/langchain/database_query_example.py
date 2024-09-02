@@ -1,13 +1,18 @@
-from langchain import OpenAI, SQLDatabase
+from dotenv import load_dotenv
+from langchain_openai.chat_models import ChatOpenAI
+from langchain_community.utilities import SQLDatabase
 from langchain_experimental.sql import SQLDatabaseChain
-from langchain.agents.agent_toolkits.gmail.toolkit import GmailToolkit
-from langchain.tools.gmail.utils import build_resource_service, get_gmail_credentials
+from langchain_community.agent_toolkits.gmail.toolkit import GmailToolkit
+from langchain_community.tools.gmail.utils import build_resource_service, get_gmail_credentials
 from langchain.agents import initialize_agent, AgentType
 import os
-API_KEY = os.environ['OPENAI_API_KEY']
-# setup llm
-llm = OpenAI(temperature=0, openai_api_key=API_KEY, model_name='gpt-4')
 
+
+load_dotenv()
+
+API_KEY = os.environ.get('OPENAI_API_KEY')
+# setup llm
+llm = ChatOpenAI(temperature=0, openai_api_key=API_KEY, model_name='gpt-4o-mini')
 
 def create_gmail_toolkit():
     # Can review scopes here https://developers.google.com/gmail/api/auth/scopes
@@ -20,7 +25,6 @@ def create_gmail_toolkit():
     api_resource = build_resource_service(credentials=credentials)
     return GmailToolkit(api_resource=api_resource)
 
-
 def create_gmail_agent(llm, toolkit):
     return initialize_agent(
         tools=toolkit.get_tools(),
@@ -28,27 +32,22 @@ def create_gmail_agent(llm, toolkit):
         agent=AgentType.STRUCTURED_CHAT_ZERO_SHOT_REACT_DESCRIPTION,
     )
 
-
 # setup email agent if you want to send the results somewhere
 # Make sure to have a credentials.json file with a google app with Gmail enabled
 # Create a google app here: https://console.cloud.google.com/apis
-# The first time this runs, you'll be asked to give permission and it will create a token.json file
-YOUR_EMAIL = ''
+YOUR_EMAIL = ''# os.environ.get('YOUR_EMAIL')
 agent = None
 if YOUR_EMAIL:
     toolkit = create_gmail_toolkit()
     agent = create_gmail_agent(llm, toolkit)
 
-database_url = os.environ['LANGCHAIN_DATABASE_URL']
-# TODO Change to this if you are using the local database
-# database_url = 'postgresql+psycopg2://localhost:5432/postgres'
+database_url = 'postgresql+psycopg2://postgres:postgres@localhost:5432/postgres'#os.environ['LANGCHAIN_DATABASE_URL']
 
 # Setup database
 db = SQLDatabase.from_uri(
     database_url,
     include_tables=['medals', 'match_details', 'matches', 'medals_matches_players']
 )
-
 
 # Create db chain
 QUERY = """
@@ -65,8 +64,6 @@ Answer: Final answer here
 
 # Setup the database chain
 db_chain = SQLDatabaseChain(llm=llm, database=db, verbose=True)
-
-
 
 def get_prompt():
     print("Type 'exit' to quit")

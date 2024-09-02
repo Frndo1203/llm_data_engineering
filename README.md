@@ -1,18 +1,5 @@
 # LLM-driven Data Engineering
 
-## Getting Started
-
-Make an OpenAI account [here](https://platform.openai.com/) and then generate an API Key.
-
-- You will need to supply a credit card but you will also get $5 in free credit which is more than enough for this lab and tomorrow's lab.
-
-The live Zoom classes will be held here:
-- [Day 1 (LLM-driven data engineering)](https://us06web.zoom.us/meeting/register/tZ0pcuqppjopHNFyy-G52Hh2jKdRlePT66oe#/registration)
-  - Lecture Video is [here](https://www.dataengineer.io/course/large-language-models-day-1-lecture)
-  - Lab video is [here](https://www.dataengineer.io/course/large-language-models-day-1-lab)
-- [Day 2 (LLM dev with LangChain)](https://us06web.zoom.us/meeting/register/tZYude6grj8pEt23y6J1rhHcXL2ytMX8IRzy#/registration)
-
-
 ## Setup
 
 Store the API key as an environment variable like:
@@ -39,4 +26,4 @@ If you aren't watching live, you'll need to use the `halo_data_dump.dump` file l
 Running `pg_restore` with your local database should get you up and running pretty quickly. 
 
 - example command, assuming you got Postgres up and running either via Homebrew or Docker:
- - `pg_restore -h localhost -p 5432  -d postgres -U <your laptop username> halo_data_dump.dump`
+ - `pg_restore -h localhost -p 5432 -d postgres -U postgres --clean --if-exists --no-owner --disable-triggers --no-acl data/halo_data_dump.dump`
